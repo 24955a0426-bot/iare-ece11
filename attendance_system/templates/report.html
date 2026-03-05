@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Report</title>
+    <style>
+        :root {
+            --bg: #f7f4fb;
+            --card: #ffffff;
+            --primary: #5a2d82;
+            --primary-dark: #451f65;
+            --text: #1a1a1a;
+            --muted: #5f6b7a;
+            --border: #ddd1ea;
+            --present: #177245;
+            --absent: #a32222;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text);
+            background: linear-gradient(135deg, #efe4fb, #f7f4fb);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1050px;
+            margin: 0 auto;
+            display: grid;
+            gap: 14px;
+        }
+
+        .panel {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 10px 24px rgba(90, 45, 130, 0.1);
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        h1 {
+            margin: 0;
+            color: var(--primary);
+        }
+
+        form {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: end;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        input, select {
+            padding: 9px 10px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            min-width: 170px;
+        }
+
+        .btn {
+            display: inline-block;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 13px;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-muted {
+            background: #edf2f4;
+            color: #1a1a1a;
+            border: 1px solid #d5dde1;
+        }
+
+        .summary {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            border-radius: 999px;
+            padding: 7px 12px;
+            color: #ffffff;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .present {
+            background: var(--present);
+        }
+
+        .absent {
+            background: var(--absent);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+            font-size: 0.95rem;
+        }
+
+        th, td {
+            border: 1px solid var(--border);
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background: #f9f5ff;
+        }
+
+        .status-present {
+            color: var(--present);
+            font-weight: 700;
+        }
+
+        .status-absent {
+            color: var(--absent);
+            font-weight: 700;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+
+        .inline-actions-form {
+            margin: 0;
+        }
+
+        .row-form {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .row-form select {
+            min-width: 105px;
+            padding: 6px 8px;
+        }
+
+        .btn-danger {
+            background: #a32222;
+            color: #ffffff;
+        }
+
+        .btn-danger:hover {
+            background: #7d1717;
+        }
+
+        .btn-small {
+            padding: 7px 10px;
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 650px) {
+            table, thead, tbody, th, td, tr {
+                display: block;
+            }
+
+            thead {
+                display: none;
+            }
+
+            tr {
+                border: 1px solid var(--border);
+                border-radius: 10px;
+                margin-bottom: 10px;
+                padding: 8px;
+            }
+
+            td {
+                border: none;
+                padding: 6px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="panel topbar">
+            <h1>Attendance Report</h1>
+            <a class="btn btn-muted" href="{{ url_for('hod_dashboard') }}">Back to HOD Dashboard</a>
+        </div>
+
+        <div class="panel">
+            <form method="get" action="{{ url_for('attendance_report') }}">
+                <div>
+                    <label for="date">Date</label>
+                    <input id="date" name="date" type="date" value="{{ selected_date }}" required>
+                </div>
+                <div>
+                    <label for="workshop">Workshop</label>
+                    <select id="workshop" name="workshop">
+                        <option value="vlsi" {% if workshop_key == 'vlsi' %}selected{% endif %}>VLSI Workshop</option>
+                        <option value="embedded" {% if workshop_key == 'embedded' %}selected{% endif %}>Embedded Systems Workshop</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="session">Session</label>
+                    <select id="session" name="session">
+                        {% for option in session_options %}
+                            <option value="{{ option }}" {% if selected_session == option %}selected{% endif %}>{{ option }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <button class="btn btn-primary" type="submit">View Report</button>
+                </div>
+            </form>
+
+            <div class="actions">
+                <a class="btn btn-primary" href="{{ url_for('export_report_csv', date=selected_date, workshop=workshop_key, session=selected_session) }}">Export CSV</a>
+                <form class="inline-actions-form" method="post" action="{{ url_for('delete_attendance_batch') }}" onsubmit="return confirm('Delete all attendance records for this selected batch?');">
+                    <input type="hidden" name="date" value="{{ selected_date }}">
+                    <input type="hidden" name="workshop" value="{{ workshop_key }}">
+                    <input type="hidden" name="session" value="{{ selected_session }}">
+                    <button class="btn btn-danger" type="submit">Delete Whole Batch</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2>{{ workshop_label }} - {{ selected_date }} ({{ selected_session }})</h2>
+            <div class="summary">
+                <div class="badge present">Present: {{ present_count }}</div>
+                <div class="badge absent">Absent: {{ absent_count }}</div>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>S.No</th>
+                        <th>Roll Number</th>
+                        <th>Status</th>
+                        <th>Edit / Delete</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in report_rows %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ row.roll_number }}</td>
+                            <td class="{{ 'status-present' if row.status == 'Present' else 'status-absent' }}">{{ row.status }}</td>
+                            <td>
+                                <div class="row-form">
+                                    <form method="post" action="{{ url_for('update_attendance_record') }}">
+                                        <input type="hidden" name="roll_number" value="{{ row.roll_number }}">
+                                        <input type="hidden" name="date" value="{{ selected_date }}">
+                                        <input type="hidden" name="workshop" value="{{ workshop_key }}">
+                                        <input type="hidden" name="session" value="{{ selected_session }}">
+                                        <select name="status">
+                                            <option value="Present" {% if row.status == 'Present' %}selected{% endif %}>Present</option>
+                                            <option value="Absent" {% if row.status == 'Absent' %}selected{% endif %}>Absent</option>
+                                        </select>
+                                        <button class="btn btn-primary btn-small" type="submit">Update</button>
+                                    </form>
+
+                                    <form method="post" action="{{ url_for('delete_attendance_record') }}" onsubmit="return confirm('Delete attendance for {{ row.roll_number }}?');">
+                                        <input type="hidden" name="roll_number" value="{{ row.roll_number }}">
+                                        <input type="hidden" name="date" value="{{ selected_date }}">
+                                        <input type="hidden" name="workshop" value="{{ workshop_key }}">
+                                        <input type="hidden" name="session" value="{{ selected_session }}">
+                                        <button class="btn btn-danger btn-small" type="submit">Delete</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,9 @@
+[build]
+  command = "echo Netlify proxy setup"
+  publish = "."
+
+[[redirects]]
+  from = "/*"
+  to = "https://YOUR-RENDER-APP.onrender.com/:splat"
+  status = 200
+  force = true

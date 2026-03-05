@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOD Dashboard</title>
+    <style>
+        :root {
+            --bg: #f4f8f7;
+            --card: #ffffff;
+            --primary: #0b6b4f;
+            --primary-dark: #084f3b;
+            --text: #1a1a1a;
+            --muted: #5f6b7a;
+            --border: #d6e5df;
+            --error: #a32222;
+            --success: #177245;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text);
+            background: linear-gradient(135deg, #e5f5ee, #f4f8f7);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: grid;
+            gap: 16px;
+        }
+
+        .panel {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 10px 24px rgba(11, 107, 79, 0.08);
+        }
+
+        h1, h2 {
+            margin-top: 0;
+            color: var(--primary);
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-block;
+            text-decoration: none;
+            border: none;
+            border-radius: 8px;
+            padding: 9px 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-muted {
+            background: #edf2f4;
+            color: #1a1a1a;
+            border: 1px solid #d5dde1;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+        }
+
+        .stat {
+            background: #fafdfc;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+        }
+
+        .sample-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .sample-item {
+            border: 1px dashed var(--border);
+            border-radius: 10px;
+            padding: 10px;
+            background: #fbfffd;
+        }
+
+        .sample-item strong {
+            display: block;
+            margin-bottom: 7px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            margin-bottom: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px;
+            background: #fff;
+        }
+
+        .flash {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .flash li {
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 0.92rem;
+        }
+
+        .flash .success {
+            background: #e8f7ef;
+            color: var(--success);
+            border: 1px solid #bde4cb;
+        }
+
+        .flash .error {
+            background: #fdecec;
+            color: var(--error);
+            border: 1px solid #f3b6b6;
+        }
+
+        .inline-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            align-items: end;
+        }
+
+        .inline-form input,
+        .inline-form select {
+            width: 100%;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 9px 10px;
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="panel topbar">
+            <h1>HOD Dashboard</h1>
+            <div>
+                <a class="btn btn-primary" href="{{ url_for('attendance_report') }}">View Attendance Reports</a>
+                <a class="btn btn-muted" href="{{ url_for('logout') }}">Logout</a>
+            </div>
+        </div>
+
+        <div class="panel">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <ul class="flash">
+                        {% for category, message in messages %}
+                            <li class="{{ category }}">{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+
+            <h2>Upload Student CSV Files</h2>
+            <div class="sample-links">
+                <div class="sample-item">
+                    <strong>VLSI Sample CSV</strong>
+                    <a class="btn btn-muted" href="{{ url_for('download_sample_csv', workshop_key='vlsi') }}">Download Sample</a>
+                </div>
+                <div class="sample-item">
+                    <strong>Embedded Sample CSV</strong>
+                    <a class="btn btn-muted" href="{{ url_for('download_sample_csv', workshop_key='embedded') }}">Download Sample</a>
+                </div>
+                <div class="sample-item">
+                    <strong>Not In Workshop Sample CSV</strong>
+                    <a class="btn btn-muted" href="{{ url_for('download_sample_csv', workshop_key='not_in_workshop') }}">Download Sample</a>
+                </div>
+            </div>
+
+            <form method="post" enctype="multipart/form-data">
+                <label for="vlsi_file">VLSI Students List</label>
+                <input id="vlsi_file" name="vlsi_file" type="file" accept=".csv">
+
+                <label for="embedded_file">Embedded Systems Students List</label>
+                <input id="embedded_file" name="embedded_file" type="file" accept=".csv">
+
+                <label for="not_in_workshop_file">Students Not Participating in Workshop</label>
+                <input id="not_in_workshop_file" name="not_in_workshop_file" type="file" accept=".csv">
+
+                <button class="btn btn-primary" type="submit">Upload CSV Files</button>
+            </form>
+        </div>
+
+        <div class="panel">
+            <h2>Add Roll Number To Any Domain</h2>
+            <form method="post" action="{{ url_for('add_student_hod') }}" class="inline-form">
+                <div>
+                    <label for="workshop">Select Domain</label>
+                    <select id="workshop" name="workshop" required>
+                        <option value="vlsi">VLSI Workshop</option>
+                        <option value="embedded">Embedded Systems Workshop</option>
+                        <option value="not_in_workshop">Students Not in Workshop</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="roll_number">Roll Number</label>
+                    <input id="roll_number" name="roll_number" type="text" placeholder="e.g. 22A91A0401" required>
+                </div>
+                <div>
+                    <button class="btn btn-primary" type="submit">Add Student</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="panel">
+            <h2>Current Student Counts</h2>
+            <div class="grid">
+                <div class="stat">
+                    <strong>VLSI Workshop</strong>
+                    <div>{{ counts.vlsi }} students</div>
+                </div>
+                <div class="stat">
+                    <strong>Embedded Systems Workshop</strong>
+                    <div>{{ counts.embedded }} students</div>
+                </div>
+                <div class="stat">
+                    <strong>Not in Workshop</strong>
+                    <div>{{ counts.not_in_workshop }} students</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

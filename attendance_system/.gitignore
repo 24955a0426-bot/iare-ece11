@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+.env
+attendance.db
+attendance/*.csv
+students/temp_*.csv
